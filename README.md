@@ -2,7 +2,7 @@
 
 **AI-Powered Multilingual Video Assessment for Karnataka's Workforce**
 
-> AI for Bharat Hackathon — Theme 5 | PAN IIT Bangalore × Government of Karnataka (EDCS)
+> AI for Bharat Hackathon — Theme 5 
 
 ---
 
@@ -16,8 +16,8 @@ The AI agent asks role-specific questions, records and transcribes responses usi
 
 ## Live Demo
 
-> Candidate Interview: `https://skillfit-ai.vercel.app`
-> Admin Dashboard: `https://skillfit-ai.vercel.app/admin`
+> Candidate Interview: `https://skillfit-ai-nine.vercel.app`
+> Admin Dashboard: `https://skillfit-ai-nine.vercel.app/admin`
 
 ---
 
