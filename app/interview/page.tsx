@@ -3,6 +3,24 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Language, QuestionResponse } from '@/types';
 
+
+async function speakQuestion(text: string, lang: Language) {
+  try {
+    const res = await fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, language: lang }),
+    });
+    const data = await res.json();
+    if (data.audio) {
+      const audio = new Audio(`data:audio/wav;base64,${data.audio}`);
+      audio.play();
+    }
+  } catch {
+    // TTS failed silently — question still shown as text
+  }
+}
+
 function InterviewContent() {
   const router = useRouter();
   const params = useSearchParams();
@@ -51,8 +69,10 @@ function InterviewContent() {
         body: JSON.stringify({ language: lang, skillCategory, tradeOrRole }),
       });
       const data = await res.json();
-      setQuestions(data.questions || []);
+      const qs = data.questions || [];
+      setQuestions(qs);
       setStage('ready');
+      if (qs.length > 0) speakQuestion(qs[0], lang);
     } catch {
       setError('Failed to load questions. Please refresh.');
     }
@@ -226,8 +246,8 @@ function InterviewContent() {
       </div>
 
       {/* Video */}
-      <div style={{ position: 'relative', background: '#1a1a1a', aspectRatio: '16/9', maxHeight: 240 }}>
-        <video ref={videoRef} autoPlay muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      <div style={{ position: 'relative', background: '#1a1a1a', width: '100%', height: 'min(40vh, 320px)' }}>
+        <video ref={videoRef} autoPlay muted playsInline style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#1a1a1a' }} />
         {isRecording && (
           <div style={{ position: 'absolute', top: 12, right: 12, background: '#DC2626', color: '#fff', padding: '4px 10px', borderRadius: 20, fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ width: 8, height: 8, background: '#fff', borderRadius: '50%', animation: 'pulse 1s ease infinite' }} />
@@ -267,7 +287,7 @@ function InterviewContent() {
                 <p style={{ color: '#166534', fontWeight: 600, margin: '0 0 4px', fontSize: 14 }}>✓ Response recorded</p>
                 <p style={{ color: '#166534', fontSize: 13, margin: 0 }}>{responses[currentQ]?.feedback}</p>
               </div>
-              <button onClick={() => setCurrentQ(q => q + 1)}
+              <button onClick={() => { const next = currentQ + 1; setCurrentQ(next); if (questions[next]) speakQuestion(questions[next], lang); }}
                 style={{ background: '#0F4C2A', color: '#fff', padding: '16px', borderRadius: 14, border: 'none', fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>
                 {currentQ + 1 >= questions.length ? `🏁 ${L.finish}` : `➡️ ${L.next}`}
               </button>
